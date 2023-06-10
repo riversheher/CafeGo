@@ -5,7 +5,7 @@ import (
 )
 
 type Order struct {
-	ID       int64     `json:"id"`
+	ID       string    `json:"id"`
 	Customer User      `json:"customer"`
 	Products []Product `json:"products"`
 	Time     time.Time `json:"time"`
