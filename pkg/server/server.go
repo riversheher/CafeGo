@@ -1,18 +1,12 @@
 package server
 
 import (
-	"context"
-
 	"github.com/labstack/echo/v4"
 
 	"github.com/rainbowriverrr/CafeGo/internal/controller"
-
-	"sync"
 )
 
 type Server struct {
-	WaitGroup *sync.WaitGroup
-	Ctx       context.Context
 }
 
 func registerControllers(e *echo.Echo) {
@@ -24,8 +18,6 @@ func registerControllers(e *echo.Echo) {
 }
 
 func (srv *Server) Start() {
-	defer srv.WaitGroup.Done()
-
 	e := echo.New()
 
 	registerControllers(e)

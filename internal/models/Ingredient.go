@@ -22,7 +22,7 @@ func (u Unit) String() string {
 }
 
 type Ingredient struct {
-	ID           string       `json:"id"`
+	ID           int64        `json:"id"`
 	Name         string       `json:"name"`
 	Description  string       `json:"description"`
 	Price        float64      `json:"price"`
