@@ -1,0 +1,2 @@
+test: 
+	@echo "testing everything"
