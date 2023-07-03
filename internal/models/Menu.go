@@ -18,7 +18,7 @@ const (
 	ProductToMenuTable = "productToMenu"
 )
 
-func CreateMenuTables(db *sql.DB) {
+func createMenuTables(db *sql.DB) {
 	menu := `CREATE TABLE IF NOT EXISTS menus (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT,
