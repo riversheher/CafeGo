@@ -31,9 +31,13 @@ func deleteDB(name string) {
 	}
 }
 
-// create Tables for the database
-func createTables(db *sql.DB) {
-
+func TableExists(db *sql.DB, tableName string) (bool, error) {
+	var exists bool
+	err := db.QueryRow("SELECT name FROM sqlite_master WHERE type='table' AND name=?", tableName).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
 }
 
 // Initializes the application database, returns db connection

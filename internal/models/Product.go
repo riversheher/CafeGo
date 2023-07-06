@@ -17,13 +17,13 @@ type Product struct {
 }
 
 const (
-	ProductTable        = "products"
-	IngredientToProduct = "ingredientToProduct"
+	ProductTable             = "products"
+	IngredientToProductTable = "ingredientToProduct"
 )
 
 func createProductTables(db *sql.DB) {
 
-	products := `CREATE TABLE IF NOT EXISTS products (
+	products := `CREATE TABLE IF NOT EXISTS ? (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT,
 		description TEXT,
@@ -32,7 +32,7 @@ func createProductTables(db *sql.DB) {
 		type TEXT
 	);`
 
-	ingredients := `CREATE TABLE IF NOT EXISTS ingredientToProduct (
+	ingredients := `CREATE TABLE IF NOT EXISTS ? (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		product_id INTEGER,
 		ingredient_id INTEGER,
@@ -40,12 +40,12 @@ func createProductTables(db *sql.DB) {
 		FOREIGN KEY(ingredient_id) REFERENCES ingredients(id) ON DELETE CASCADE ON UPDATE CASCADE
 	);`
 
-	_, err := db.Exec(products)
+	_, err := db.Exec(products, ProductTable)
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = db.Exec(ingredients)
+	_, err = db.Exec(ingredients, IngredientToProductTable)
 	if err != nil {
 		panic(err)
 	}
