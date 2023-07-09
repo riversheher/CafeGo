@@ -21,7 +21,7 @@ const (
 	ProductToOrderTable = "productToOrder"
 )
 
-func createOrderTables(db *sql.DB) {
+func CreateOrderTables(db *sql.DB) {
 	order := `CREATE TABLE IF NOT EXISTS %s (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		customer_id INTEGER,

@@ -18,7 +18,7 @@ const (
 	UserTable = "users"
 )
 
-func createUserTables(db *sql.DB) {
+func CreateUserTables(db *sql.DB) {
 	users := `CREATE TABLE IF NOT EXISTS %s (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT,

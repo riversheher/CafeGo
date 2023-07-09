@@ -43,7 +43,7 @@ const (
 	AlternativesTable = "alternatives"
 )
 
-func createIngredientTables(db *sql.DB) {
+func CreateIngredientTables(db *sql.DB) {
 	ingredients := `CREATE TABLE IF NOT EXISTS %s (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT,

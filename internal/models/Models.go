@@ -7,10 +7,10 @@ import (
 )
 
 func InitTables(db *sql.DB) {
-	createIngredientTables(db)
-	createProductTables(db)
-	createMenuTables(db)
-	createUserTables(db)
-	createAdminTables(db)
-	createOrderTables(db)
+	CreateIngredientTables(db)
+	CreateProductTables(db)
+	CreateMenuTables(db)
+	CreateUserTables(db)
+	CreateAdminTables(db)
+	CreateOrderTables(db)
 }

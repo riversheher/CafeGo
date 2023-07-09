@@ -24,7 +24,7 @@ func dbExists(name string) bool {
 }
 
 // delete a sqlite database file
-func deleteDB(name string) {
+func DeleteDB(name string) {
 	err := os.Remove(name + ".db")
 	if err != nil {
 		panic(err)

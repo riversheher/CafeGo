@@ -17,7 +17,7 @@ type Admin struct {
 	Password string `json:"password"`
 }
 
-func createAdminTables(db *sql.DB) {
+func CreateAdminTables(db *sql.DB) {
 	admins := `CREATE TABLE IF NOT EXISTS %s (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		user_id INTEGER,

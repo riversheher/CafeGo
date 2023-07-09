@@ -10,9 +10,13 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+const (
+	testDB = "test"
+)
+
 // TestInitTables tests the InitTables function
 func TestInitTables(t *testing.T) {
-	var db *sql.DB = database.InitDB("test")
+	var db *sql.DB = database.InitDB(testDB)
 	defer db.Close()
 
 	models.InitTables(db)
@@ -55,4 +59,9 @@ func TestInitTables(t *testing.T) {
 			t.Errorf("Error querying table %s: %s", table, err.Error())
 		}
 	}
+}
+
+func clean() {
+	//delete test database
+	database.DeleteDB(testDB)
 }

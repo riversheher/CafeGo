@@ -22,7 +22,7 @@ const (
 	IngredientToProductTable = "ingredientToProduct"
 )
 
-func createProductTables(db *sql.DB) {
+func CreateProductTables(db *sql.DB) {
 
 	products := `CREATE TABLE IF NOT EXISTS %s (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
