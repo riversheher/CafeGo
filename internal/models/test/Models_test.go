@@ -17,7 +17,9 @@ const (
 // TestInitTables tests the InitTables function
 func TestInitTables(t *testing.T) {
 	var db *sql.DB = database.InitDB(testDB)
+
 	defer db.Close()
+	defer clean()
 
 	models.InitTables(db)
 

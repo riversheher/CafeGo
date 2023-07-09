@@ -1,12 +1,15 @@
 package server
 
 import (
+	"database/sql"
+
 	"github.com/labstack/echo/v4"
 
 	"github.com/rainbowriverrr/CafeGo/internal/controller"
 )
 
 type Server struct {
+	db *sql.DB
 }
 
 func registerControllers(e *echo.Echo) {
