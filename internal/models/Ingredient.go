@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"fmt"
 
 	_ "modernc.org/sqlite"
 )
@@ -43,7 +44,7 @@ const (
 )
 
 func createIngredientTables(db *sql.DB) {
-	ingredients := `CREATE TABLE IF NOT EXISTS ingredients (
+	ingredients := `CREATE TABLE IF NOT EXISTS %s (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT,
 		description TEXT,
@@ -52,7 +53,7 @@ func createIngredientTables(db *sql.DB) {
 		type INTEGER
 	);`
 
-	alternatives := `CREATE TABLE IF NOT EXISTS alternatives (
+	alternatives := `CREATE TABLE IF NOT EXISTS %s (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		ingredient_id INTEGER,
 		alternative_id INTEGER,
@@ -60,12 +61,12 @@ func createIngredientTables(db *sql.DB) {
 		FOREIGN KEY(alternative_id) REFERENCES ingredients(id) ON DELETE CASCADE ON UPDATE CASCADE
 	);`
 
-	_, err := db.Exec(ingredients)
+	_, err := db.Exec(fmt.Sprintf(ingredients, IngredientTable))
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = db.Exec(alternatives)
+	_, err = db.Exec(fmt.Sprintf(alternatives, AlternativesTable))
 	if err != nil {
 		panic(err)
 	}

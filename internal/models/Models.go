@@ -11,6 +11,6 @@ func InitTables(db *sql.DB) {
 	createProductTables(db)
 	createMenuTables(db)
 	createUserTables(db)
-	createAdminTable(db)
+	createAdminTables(db)
 	createOrderTables(db)
 }

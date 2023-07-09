@@ -46,7 +46,7 @@ func InitDB(appName string) *sql.DB {
 		createDB(appName)
 	}
 
-	db, err := sql.Open("sqlite3", appName+".db")
+	db, err := sql.Open("sqlite", appName+".db")
 	if err != nil {
 		panic(err)
 	}

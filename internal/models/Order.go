@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
 	_ "modernc.org/sqlite"
@@ -21,15 +22,15 @@ const (
 )
 
 func createOrderTables(db *sql.DB) {
-	order := `CREATE TABLE IF NOT EXISTS orders (
+	order := `CREATE TABLE IF NOT EXISTS %s (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		customer_id INTEGER,
-		time BLOB,
+		time TIMESTAMP,
 		subtotal REAL,
 		FOREIGN KEY(customer_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
 	);`
 
-	products := `CREATE TABLE IF NOT EXISTS productToOrder (
+	products := `CREATE TABLE IF NOT EXISTS %s (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		order_id INTEGER,
 		product_id INTEGER,
@@ -37,12 +38,12 @@ func createOrderTables(db *sql.DB) {
 		FOREIGN KEY(product_id) REFERENCES products(id) ON DELETE CASCADE ON UPDATE CASCADE
 	);`
 
-	_, err := db.Exec(order)
+	_, err := db.Exec(fmt.Sprintf(order, OrderTable))
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = db.Exec(products)
+	_, err = db.Exec(fmt.Sprintf(products, ProductToOrderTable))
 	if err != nil {
 		panic(err)
 	}

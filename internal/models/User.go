@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"fmt"
 
 	_ "modernc.org/sqlite"
 )
@@ -18,14 +19,14 @@ const (
 )
 
 func createUserTables(db *sql.DB) {
-	users := `CREATE TABLE IF NOT EXISTS users(
+	users := `CREATE TABLE IF NOT EXISTS %s (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT,
 		phone TEXT,
 		rewards INTEGER
 	);`
 
-	_, err := db.Exec(users)
+	_, err := db.Exec(fmt.Sprintf(users, UserTable))
 	if err != nil {
 		panic(err)
 	}
