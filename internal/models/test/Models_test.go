@@ -1,8 +1,8 @@
 package models_test
 
 import (
-	"database/sql"
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/rainbowriverrr/CafeGo/internal/models"
@@ -15,7 +15,7 @@ const (
 )
 
 var (
-	db     *sql.DB
+	app    models.Application
 	tables = []string{
 		models.IngredientTable,
 		models.MenuTable,
@@ -31,26 +31,33 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	db = database.InitDB(testDB)
-	defer db.Close()
+	//setup
+	app = models.Application{
+		DB: database.InitDB(testDB),
+	}
+	defer app.DB.Close()
 
-	m.Run()
+	//tests
+	exitVal := m.Run()
 
+	//clean up
 	clean()
+
+	os.Exit(exitVal)
 }
 
 func clean() {
 	//delete test database
-	db.Close()
+	app.DB.Close()
 	database.DeleteDB(testDB)
 }
 
 // TestInitTables tests the InitTables function
 func TestInitTables(t *testing.T) {
-	models.InitTables(db)
+	models.InitTables(app.DB)
 
 	query := "SELECT name FROM sqlite_schema WHERE type='table' AND name NOT  LIKE 'sqlite_%';"
-	rows, err := db.Query(query)
+	rows, err := app.DB.Query(query)
 	if err != nil {
 		t.Errorf("Error querying database: %s", err.Error())
 	}
@@ -69,7 +76,7 @@ func TestInitTables(t *testing.T) {
 
 	// check if tables exist
 	for _, table := range tables {
-		_, err := db.Query(fmt.Sprintf("SELECT * FROM %s", table))
+		_, err := app.DB.Query(fmt.Sprintf("SELECT * FROM %s", table))
 		if err != nil {
 			t.Errorf("Error querying table %s: %s", table, err.Error())
 		}
@@ -77,7 +84,7 @@ func TestInitTables(t *testing.T) {
 
 	//drop all tables
 	for _, table := range tables {
-		_, err := db.Exec(fmt.Sprintf("DROP TABLE %s", table))
+		_, err := app.DB.Exec(fmt.Sprintf("DROP TABLE %s", table))
 		if err != nil {
 			t.Errorf("Error dropping table %s: %s", table, err.Error())
 		}

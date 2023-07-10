@@ -12,11 +12,11 @@ func init() {
 }
 
 func TestCreateUserTables(t *testing.T) {
-	models.CreateUserTables(db)
+	models.CreateUserTables(app.DB)
 
 	//check if table exists
 	query := "SELECT name FROM sqlite_schema WHERE type='table' AND name = ?;"
-	rows, err := db.Query(query, models.UserTable)
+	rows, err := app.DB.Query(query, models.UserTable)
 	if err != nil {
 		t.Errorf("Error querying database: %s", err.Error())
 	}
@@ -29,12 +29,8 @@ func TestCreateUserTables(t *testing.T) {
 }
 
 func TestUserExists(t *testing.T) {
-	app := models.Application{
-		DB: db,
-	}
-
 	//create table and insert user
-	models.CreateUserTables(db)
+	models.CreateUserTables(app.DB)
 	user := models.User{
 		Name:  "test",
 		Phone: "1234567890",
@@ -46,4 +42,8 @@ func TestUserExists(t *testing.T) {
 	if exists == false {
 		t.Errorf("User %s does not exist", user.Name)
 	}
+}
+
+func TestGetUserByPhone(t *testing.T) {
+
 }
