@@ -1,9 +1,11 @@
 package models_test
 
 import (
-	"fmt"
-	"os"
+	"database/sql"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/rainbowriverrr/CafeGo/internal/models"
 	"github.com/rainbowriverrr/CafeGo/pkg/database"
@@ -11,12 +13,18 @@ import (
 )
 
 const (
-	testDB = "test"
+	mainDB = "test"
 )
 
-var (
-	app    models.Application
-	tables = []string{
+type ModelsTestSuite struct {
+	suite.Suite
+	MainDB *sql.DB
+	tables []string
+}
+
+func (suite *ModelsTestSuite) SetupTest() {
+	suite.MainDB = database.InitDB(mainDB)
+	suite.tables = []string{
 		models.IngredientTable,
 		models.MenuTable,
 		models.ProductTable,
@@ -28,65 +36,25 @@ var (
 		models.ProductToOrderTable,
 		models.IngredientToProductTable,
 	}
-)
-
-func TestMain(m *testing.M) {
-	//setup
-	app = models.Application{
-		DB: database.InitDB(testDB),
-	}
-	defer app.DB.Close()
-
-	//tests
-	exitVal := m.Run()
-
-	//clean up
-	clean()
-
-	os.Exit(exitVal)
 }
 
-func clean() {
-	//delete test database
-	app.DB.Close()
-	database.DeleteDB(testDB)
+func (suite *ModelsTestSuite) TearDownTest() {
+	database.DeleteDB(mainDB)
 }
 
 // TestInitTables tests the InitTables function
-func TestInitTables(t *testing.T) {
-	models.InitTables(app.DB)
+func (suite *ModelsTestSuite) TestInitTables() {
+	models.InitTables(suite.MainDB)
 
-	query := "SELECT name FROM sqlite_schema WHERE type='table' AND name NOT  LIKE 'sqlite_%';"
-	rows, err := app.DB.Query(query)
-	if err != nil {
-		t.Errorf("Error querying database: %s", err.Error())
-	}
-
-	defer rows.Close()
-
-	//Print out all tables
-	for rows.Next() {
-		var name string
-		err = rows.Scan(&name)
+	for _, table := range suite.tables {
+		exists, err := database.TableExists(suite.MainDB, table)
 		if err != nil {
-			t.Errorf("Error scanning rows: %s", err.Error())
+			suite.T().Errorf("Error checking if table exists: %s", err.Error())
 		}
-		t.Logf("Table: %s", name)
+		assert.True(suite.T(), exists)
 	}
+}
 
-	// check if tables exist
-	for _, table := range tables {
-		_, err := app.DB.Query(fmt.Sprintf("SELECT * FROM %s", table))
-		if err != nil {
-			t.Errorf("Error querying table %s: %s", table, err.Error())
-		}
-	}
-
-	//drop all tables
-	for _, table := range tables {
-		_, err := app.DB.Exec(fmt.Sprintf("DROP TABLE %s", table))
-		if err != nil {
-			t.Errorf("Error dropping table %s: %s", table, err.Error())
-		}
-	}
+func TestModels(t *testing.T) {
+	suite.Run(t, new(ModelsTestSuite))
 }

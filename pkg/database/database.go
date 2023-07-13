@@ -33,7 +33,7 @@ func DeleteDB(name string) {
 
 func TableExists(db *sql.DB, tableName string) (bool, error) {
 	var exists bool
-	err := db.QueryRow("SELECT name FROM sqlite_master WHERE type='table' AND name=?", tableName).Scan(&exists)
+	err := db.QueryRow("SELECT EXISTS (SELECT name FROM sqlite_master WHERE type='table' AND name=?)", tableName).Scan(&exists)
 	if err != nil {
 		return false, err
 	}

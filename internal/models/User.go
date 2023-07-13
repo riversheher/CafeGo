@@ -18,6 +18,12 @@ const (
 	UserTable = "users"
 )
 
+// users are equal if their IDs or phone numbers are equal (phone numbers are unique)
+// It is possible for the IDs to not be equal if we don't know it at the time of input
+func (this User) Equals(other User) bool {
+	return (this.ID == other.ID || this.Phone == other.Phone)
+}
+
 func CreateUserTables(db *sql.DB) {
 	users := `CREATE TABLE IF NOT EXISTS %s (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -63,9 +69,9 @@ func (app *Application) GetUserByPhone(phone string) User {
 	return user
 }
 
-func (app *Application) UpdateUser(user User) {
-	query := fmt.Sprintf("UPDATE %s SET rewards = ? WHERE phone = ?", UserTable)
-	_, err := app.DB.Exec(query, user.Rewards, user.Phone)
+func (app *Application) UpdateUserByPhone(user User) {
+	query := fmt.Sprintf("UPDATE %s SET name = ? rewards = ? WHERE phone = ?", UserTable)
+	_, err := app.DB.Exec(query, user.Name, user.Rewards, user.Phone)
 	if err != nil {
 		app.ErrLog.Println(err)
 	}
