@@ -43,6 +43,10 @@ const (
 	AlternativesTable = "alternatives"
 )
 
+func (i Ingredient) Equals(other Ingredient) bool {
+	return false
+}
+
 func CreateIngredientTables(db *sql.DB) {
 	ingredients := `CREATE TABLE IF NOT EXISTS %s (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -70,4 +74,36 @@ func CreateIngredientTables(db *sql.DB) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (app *Application) IngredientExists(ingredient Ingredient) bool {
+	return false
+}
+
+func (app *Application) GetIngredient(id int64) (Ingredient, error) {
+	return Ingredient{}, nil
+}
+
+func (app *Application) UpdateIngredient(ingredient Ingredient) error {
+	return nil
+}
+
+func (app *Application) InsertIngredient(ingredient Ingredient) error {
+	return nil
+}
+
+func (app *Application) DeleteIngredient(ingredient Ingredient) error {
+	return nil
+}
+
+func (app *Application) GetAlternatives(ingredientID int64) ([]Ingredient, error) {
+	return []Ingredient{}, nil
+}
+
+func (app *Application) AddAlternative(ingredient Ingredient, alternative Ingredient) error {
+	return nil
+}
+
+func (app *Application) DeleteAlternative(ingredient Ingredient, alternative Ingredient) error {
+	return nil
 }
