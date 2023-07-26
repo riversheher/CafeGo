@@ -195,14 +195,23 @@ func (suite *UserTestSuite) UpdateUserByPhone() {
 
 func (suite *UserTestSuite) TestInsertUser() {
 	user := models.User{
-		ID:      1,
 		Name:    "test",
-		Phone:   "1234567890",
+		Phone:   "1111111111",
+		Rewards: 0,
+	}
+
+	user2 := models.User{
+		Name:    "test2",
+		Phone:   "2222222222",
 		Rewards: 0,
 	}
 
 	//insert user
-	suite.app.InsertUser(user)
+	returningUser, err := suite.app.InsertUser(user)
+	if err != nil {
+		suite.T().Errorf("Error inserting user: %s", err.Error())
+	}
+	assert.Equal(suite.T(), int64(1), returningUser.ID)
 
 	//get user
 	row := suite.app.DB.QueryRow(suite.selectQuery, user.Phone)
@@ -210,15 +219,23 @@ func (suite *UserTestSuite) TestInsertUser() {
 	var name string
 	var phone string
 	var rewards int64
-	err := row.Scan(&id, &name, &phone, &rewards)
+	err = row.Scan(&id, &name, &phone, &rewards)
 	if err != nil {
 		suite.T().Errorf("Error getting user: %s", err.Error())
 	}
 
 	//check if user is correct
+	assert.Equal(suite.T(), int64(1), id)
 	assert.Equal(suite.T(), user.Name, name)
 	assert.Equal(suite.T(), user.Phone, phone)
 	assert.Equal(suite.T(), user.Rewards, rewards)
+
+	//insert new user with auto increment
+	returningUser, err = suite.app.InsertUser(user2)
+	if err != nil {
+		suite.T().Errorf("Error inserting user: %s", err.Error())
+	}
+	assert.Equal(suite.T(), int64(2), returningUser.ID)
 }
 
 func TestUser(t *testing.T) {

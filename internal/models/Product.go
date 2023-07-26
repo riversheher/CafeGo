@@ -22,6 +22,10 @@ const (
 	IngredientToProductTable = "ingredientToProduct"
 )
 
+func (p Product) Equals(other Product) bool {
+	return false
+}
+
 func CreateProductTables(db *sql.DB) {
 
 	products := `CREATE TABLE IF NOT EXISTS %s (
@@ -50,4 +54,36 @@ func CreateProductTables(db *sql.DB) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (app *Application) ProductExists(product Product) bool {
+	return false
+}
+
+func (app *Application) GetProduct(id int64) (Product, error) {
+	return Product{}, nil
+}
+
+func (app *Application) UpdateProduct(product Product) error {
+	return nil
+}
+
+func (app *Application) DeleteProduct(id int64) error {
+	return nil
+}
+
+func (app *Application) InsertProduct(product Product) (Product, error) {
+	return Product{}, nil
+}
+
+func (app *Application) AddIngredientToProduct(product Product, ingredient Ingredient) error {
+	return nil
+}
+
+func (app *Application) RemoveIngredientFromProduct(product Product, ingredient Ingredient) error {
+	return nil
+}
+
+func (app *Application) GetIngredientsFromProduct() ([]Ingredient, error) {
+	return []Ingredient{}, nil
 }

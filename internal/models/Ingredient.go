@@ -88,8 +88,8 @@ func (app *Application) UpdateIngredient(ingredient Ingredient) error {
 	return nil
 }
 
-func (app *Application) InsertIngredient(ingredient Ingredient) error {
-	return nil
+func (app *Application) InsertIngredient(ingredient Ingredient) (Ingredient, error) {
+	return Ingredient{}, nil
 }
 
 func (app *Application) DeleteIngredient(ingredient Ingredient) error {

@@ -77,10 +77,16 @@ func (app *Application) UpdateUserByPhone(user User) {
 	}
 }
 
-func (app *Application) InsertUser(user User) {
+func (app *Application) InsertUser(user User) (User, error) {
 	query := fmt.Sprintf("INSERT INTO %s (name, phone, rewards) VALUES (?, ?, ?)", UserTable)
-	_, err := app.DB.Exec(query, user.Name, user.Phone, user.Rewards)
+	res, err := app.DB.Exec(query, user.Name, user.Phone, user.Rewards)
 	if err != nil {
-		app.ErrLog.Println(err)
+		return user, err
+	} else {
+		user.ID, err = res.LastInsertId()
+		if err != nil {
+			return user, err
+		}
+		return user, nil
 	}
 }

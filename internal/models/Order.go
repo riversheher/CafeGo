@@ -9,17 +9,22 @@ import (
 )
 
 type Order struct {
-	ID       int64     `json:"id"`
-	Customer User      `json:"customer"`
-	Products []Product `json:"products"`
-	Time     time.Time `json:"time"`
-	Subtotal float64   `json:"subtotal"`
+	ID         int64     `json:"id"`
+	Customer   User      `json:"customer"`
+	Products   []Product `json:"products"`
+	Time       time.Time `json:"time"`
+	Subtotal   float64   `json:"subtotal"`
+	InProgress bool      `json:"inProgress"`
 }
 
 const (
 	OrderTable          = "orders"
 	ProductToOrderTable = "productToOrder"
 )
+
+func (o Order) Equals(other Order) bool {
+	return false
+}
 
 func CreateOrderTables(db *sql.DB) {
 	order := `CREATE TABLE IF NOT EXISTS %s (
@@ -47,4 +52,48 @@ func CreateOrderTables(db *sql.DB) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (app *Application) OrderExists(order Order) bool {
+	return false
+}
+
+func (app *Application) GetOrder(id int64) (Order, error) {
+	return Order{}, nil
+}
+
+func (app *Application) GetAllOrders() ([]Order, error) {
+	return []Order{}, nil
+}
+
+func (app *Application) GetInProgressOrders() ([]Order, error) {
+	return []Order{}, nil
+}
+
+func (app *Application) GetCompletedOrders() ([]Order, error) {
+	return []Order{}, nil
+}
+
+func (app *Application) GetOrdersByUser(user User) ([]Order, error) {
+	return []Order{}, nil
+}
+
+func (app *Application) UpdateOrder(order Order) error {
+	return nil
+}
+
+func (app *Application) InsertOrder(order Order) (Order, error) {
+	return Order{}, nil
+}
+
+func (app *Application) AddProductToOrder(order Order, product Product) error {
+	return nil
+}
+
+func (app *Application) RemoveProductFromOrder(order Order, product Product) error {
+	return nil
+}
+
+func (app *Application) GetProductsFromOrder(order Order) ([]Product, error) {
+	return []Product{}, nil
 }
