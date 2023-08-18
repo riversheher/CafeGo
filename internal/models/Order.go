@@ -73,13 +73,7 @@ func (app *Application) GetInProgressOrders() ([]Order, error) {
 func (app *Application) GetCompletedOrders() ([]Order, error) {
 	return []Order{}, nil
 }
-
-func (app *Application) GetOrdersByUser(user User) ([]Order, error) {
-	return []Order{}, nil
-}
-
-func (app *Application) UpdateOrder(order Order) error {
-	return nil
+ develop 
 }
 
 func (app *Application) InsertOrder(order Order) (Order, error) {

@@ -13,8 +13,15 @@ const (
 
 type Admin struct {
 	User
+	AdminID  int64  `json:"admin_id"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+func (a Admin) equals(b Admin) bool {
+	return (a.AdminID == b.AdminID &&
+		a.Email == b.Email &&
+		a.Password == b.Password)
 }
 
 func CreateAdminTables(db *sql.DB) {
@@ -23,6 +30,7 @@ func CreateAdminTables(db *sql.DB) {
 		user_id INTEGER,
 		email TEXT,
 		password TEXT,
+		UNIQUE(email),
 		FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
 	);`
 
