@@ -73,8 +73,6 @@ func (app *Application) GetInProgressOrders() ([]Order, error) {
 func (app *Application) GetCompletedOrders() ([]Order, error) {
 	return []Order{}, nil
 }
- develop 
-}
 
 func (app *Application) InsertOrder(order Order) (Order, error) {
 	return Order{}, nil

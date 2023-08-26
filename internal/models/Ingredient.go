@@ -43,8 +43,13 @@ const (
 	AlternativesTable = "alternatives"
 )
 
-func (i Ingredient) Equals(other Ingredient) bool {
-	return false
+func (a Ingredient) Equals(b Ingredient) bool {
+	return (a.ID == b.ID &&
+		a.Name == b.Name &&
+		a.Description == b.Description &&
+		a.Price == b.Price &&
+		a.Amount == b.Amount &&
+		a.Type == b.Type)
 }
 
 func CreateIngredientTables(db *sql.DB) {
