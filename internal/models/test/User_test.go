@@ -207,11 +207,11 @@ func (suite *UserTestSuite) TestInsertUser() {
 	}
 
 	//insert user
-	returningUser, err := suite.app.InsertUser(user)
+	returningID, err := suite.app.InsertUser(user)
 	if err != nil {
 		suite.T().Errorf("Error inserting user: %s", err.Error())
 	}
-	assert.Equal(suite.T(), int64(1), returningUser.ID)
+	assert.Equal(suite.T(), int64(1), returningID)
 
 	//get user
 	row := suite.app.DB.QueryRow(suite.selectQuery, user.Phone)
@@ -231,11 +231,11 @@ func (suite *UserTestSuite) TestInsertUser() {
 	assert.Equal(suite.T(), user.Rewards, rewards)
 
 	//insert new user with auto increment
-	returningUser, err = suite.app.InsertUser(user2)
+	returningID, err = suite.app.InsertUser(user2)
 	if err != nil {
 		suite.T().Errorf("Error inserting user: %s", err.Error())
 	}
-	assert.Equal(suite.T(), int64(2), returningUser.ID)
+	assert.Equal(suite.T(), int64(2), returningID)
 }
 
 func TestUser(t *testing.T) {

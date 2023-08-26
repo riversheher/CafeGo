@@ -42,10 +42,10 @@ func (suite *IngredientTestSuite) SetupTest() {
 		Description:  "Floral green herb with more cronch",
 		Price:        float64(0.4),
 		Amount:       float64(800),
-		Alternatives: []models.Ingredient{suite.chives},
+		Alternatives: []int64{suite.chives.ID},
 		Type:         models.Weight,
 	}
-	suite.chives.Alternatives = []models.Ingredient{suite.leek}
+	suite.chives.Alternatives = []int64{suite.leek.ID}
 
 	suite.selectIngredients = "SELECT id, name, description, price, amount, type FROM ingredients WHERE id = ?"
 	suite.selectAlternatives = "SELECT id, ingredient_id, alternative_id FROM alternatives WHERE id = ?"
@@ -76,7 +76,7 @@ func (suite *IngredientTestSuite) TestIngredientEquals() {
 		Description:  "Floral green herb with more cronch",
 		Price:        float64(0.4),
 		Amount:       float64(800),
-		Alternatives: []models.Ingredient{suite.chives},
+		Alternatives: []int64{int64(3)},
 		Type:         models.Weight,
 	}
 
@@ -86,7 +86,7 @@ func (suite *IngredientTestSuite) TestIngredientEquals() {
 		Description:  "Floral green herb with more cronch",
 		Price:        float64(0.4),
 		Amount:       float64(800),
-		Alternatives: []models.Ingredient{suite.chives},
+		Alternatives: []int64{int64(2)},
 		Type:         models.Weight,
 	}
 
@@ -118,13 +118,22 @@ func (suite *IngredientTestSuite) TestIngredientEquals() {
 
 func (suite *IngredientTestSuite) TestIngredientExists() {
 	//insert the chives and leek into the ingredient table
-	_, err := suite.app.DB.Exec(suite.insertIngredients, suite.chives.Name, suite.chives.Description, suite.chives.Price, suite.chives.Amount, suite.chives.Type)
+	result, err := suite.app.DB.Exec(suite.insertIngredients, suite.chives.Name, suite.chives.Description, suite.chives.Price, suite.chives.Amount, suite.chives.Type)
 	if err != nil {
 		suite.T().Errorf("Error inserting chives: %s", err.Error())
 	}
-	_, err = suite.app.DB.Exec(suite.insertIngredients, suite.leek.Name, suite.leek.Description, suite.leek.Price, suite.leek.Amount, suite.leek.Type)
+	chivesID, err := result.LastInsertId()
+	if err != nil {
+		suite.T().Errorf("Error getting chives ID: %s", err.Error())
+	}
+
+	result, err = suite.app.DB.Exec(suite.insertIngredients, suite.leek.Name, suite.leek.Description, suite.leek.Price, suite.leek.Amount, suite.leek.Type)
 	if err != nil {
 		suite.T().Errorf("Error inserting leek: %s", err.Error())
+	}
+	leekID, err := result.LastInsertId()
+	if err != nil {
+		suite.T().Errorf("Error getting leek ID: %s", err.Error())
 	}
 
 	//check if chives and leek exist
@@ -132,10 +141,68 @@ func (suite *IngredientTestSuite) TestIngredientExists() {
 	assert.True(suite.T(), exists)
 	exists = suite.app.IngredientExists(suite.leek)
 	assert.True(suite.T(), exists)
+
+	//delete chives and leek from the ingredient table
+	_, err = suite.app.DB.Exec(suite.deleteIngredients, chivesID)
+	if err != nil {
+		suite.T().Errorf("Error deleting chives: %s", err.Error())
+	}
+
+	_, err = suite.app.DB.Exec(suite.deleteIngredients, leekID)
+	if err != nil {
+		suite.T().Errorf("Error deleting leek: %s", err.Error())
+	}
 }
 
 func (suite *IngredientTestSuite) TestGetIngredient() {
+	//insert the chives and leek into the ingredient table
+	result, err := suite.app.DB.Exec(suite.insertIngredients, suite.chives.Name, suite.chives.Description, suite.chives.Price, suite.chives.Amount, suite.chives.Type)
+	if err != nil {
+		suite.T().Errorf("Error inserting chives: %s", err.Error())
+	}
+	chivesID, err := result.LastInsertId()
+	if err != nil {
+		suite.T().Errorf("Error getting chives ID: %s", err.Error())
+	}
 
+	result, err = suite.app.DB.Exec(suite.insertIngredients, suite.leek.Name, suite.leek.Description, suite.leek.Price, suite.leek.Amount, suite.leek.Type)
+	if err != nil {
+		suite.T().Errorf("Error inserting leek: %s", err.Error())
+	}
+	leekID, err := result.LastInsertId()
+	if err != nil {
+		suite.T().Errorf("Error getting leek ID: %s", err.Error())
+	}
+
+	//get chives and leek from the ingredient table
+	chives, err := suite.app.GetIngredient(chivesID)
+	if err != nil {
+		suite.T().Errorf("Error getting chives: %s", err.Error())
+	}
+	assert.Equal(suite.T(), suite.chives.Name, chives.Name)
+	assert.Equal(suite.T(), suite.chives.Amount, chives.Amount)
+	assert.Equal(suite.T(), suite.chives.Description, chives.Description)
+	assert.Equal(suite.T(), suite.chives.Price, chives.Price)
+
+	leek, err := suite.app.GetIngredient(leekID)
+	if err != nil {
+		suite.T().Errorf("Error getting leek: %s", err.Error())
+	}
+	assert.Equal(suite.T(), suite.leek.Name, leek.Name)
+	assert.Equal(suite.T(), suite.leek.Amount, leek.Amount)
+	assert.Equal(suite.T(), suite.leek.Description, leek.Description)
+	assert.Equal(suite.T(), suite.leek.Price, leek.Price)
+
+	//delete chives and leek from the ingredient table
+	_, err = suite.app.DB.Exec(suite.deleteIngredients, chivesID)
+	if err != nil {
+		suite.T().Errorf("Error deleting chives: %s", err.Error())
+	}
+
+	_, err = suite.app.DB.Exec(suite.deleteIngredients, leekID)
+	if err != nil {
+		suite.T().Errorf("Error deleting leek: %s", err.Error())
+	}
 }
 
 func (suite *IngredientTestSuite) TestUpdateIngredient() {

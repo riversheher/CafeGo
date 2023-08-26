@@ -29,13 +29,13 @@ func (u Unit) String() string {
 }
 
 type Ingredient struct {
-	ID           int64        `json:"id"`
-	Name         string       `json:"name"`
-	Description  string       `json:"description"`
-	Price        float64      `json:"price"`
-	Alternatives []Ingredient `json:"alternatives"`
-	Amount       float64      `json:"amount"`
-	Type         Unit         `json:"type"`
+	ID           int64   `json:"id"`
+	Name         string  `json:"name"`
+	Description  string  `json:"description"`
+	Price        float64 `json:"price"`
+	Alternatives []int64 `json:"alternatives"`
+	Amount       float64 `json:"amount"`
+	Type         Unit    `json:"type"`
 }
 
 const (
@@ -82,31 +82,72 @@ func CreateIngredientTables(db *sql.DB) {
 }
 
 func (app *Application) IngredientExists(ingredient Ingredient) bool {
-	return false
+	var exists bool
+	var ID string
+	query := fmt.Sprintf("SELECT id FROM %s WHERE id = ?", IngredientTable)
+	err := app.DB.QueryRow(query, ingredient.ID).Scan(&ID)
+
+	if err != nil {
+		//checks if the error is not a "no rows" error, meaning the error isn't that the user doesn't exist
+		if err != sql.ErrNoRows {
+			app.ErrLog.Println(err)
+		}
+		exists = false
+	} else {
+		exists = true
+	}
+
+	return exists
 }
 
 func (app *Application) GetIngredient(id int64) (Ingredient, error) {
-	return Ingredient{}, nil
+	var ingredient Ingredient = Ingredient{}
+	query := fmt.Sprintf("SELECT id, name, description, price, amount, type FROM %s WHERE id = ?", IngredientTable)
+	err := app.DB.QueryRow(query, id).Scan(&ingredient.ID, &ingredient.Name, &ingredient.Description, &ingredient.Price, &ingredient.Amount, &ingredient.Type)
+	if err != nil {
+		app.ErrLog.Println(err)
+	}
+
+	var alternatives []int64
+	query = fmt.Sprintf("SELECT alternative_id FROM %s WHERE ingredient_id = ?", AlternativesTable)
+	rows, err := app.DB.Query(query, id)
+	if err != nil {
+		app.ErrLog.Println(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var alternative int64
+		err = rows.Scan(&alternative)
+		if err != nil {
+			app.ErrLog.Println(err)
+		}
+		alternatives = append(alternatives, alternative)
+	}
+
+	ingredient.Alternatives = alternatives
+
+	return ingredient, nil
 }
 
 func (app *Application) UpdateIngredient(ingredient Ingredient) error {
 	return nil
 }
 
-func (app *Application) InsertIngredient(ingredient Ingredient) (Ingredient, error) {
-	return Ingredient{}, nil
+func (app *Application) InsertIngredient(ingredient Ingredient) (int64, error) {
+	return 0, nil
 }
 
 func (app *Application) DeleteIngredient(ingredient Ingredient) error {
 	return nil
 }
 
-func (app *Application) GetAlternatives(ingredientID int64) ([]Ingredient, error) {
-	return []Ingredient{}, nil
+func (app *Application) GetAlternatives(ingredientID int64) ([]int64, error) {
+	return []int64{}, nil
 }
 
-func (app *Application) AddAlternative(ingredient Ingredient, alternative Ingredient) error {
-	return nil
+func (app *Application) AddAlternative(ingredient int64, alternative int64) (int64, error) {
+	return 0, nil
 }
 
 func (app *Application) DeleteAlternative(ingredient Ingredient, alternative Ingredient) error {
