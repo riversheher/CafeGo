@@ -150,6 +150,6 @@ func (app *Application) AddAlternative(ingredient int64, alternative int64) (int
 	return 0, nil
 }
 
-func (app *Application) DeleteAlternative(ingredient Ingredient, alternative Ingredient) error {
+func (app *Application) DeleteAlternative(ingredient int64, alternative int64) error {
 	return nil
 }
