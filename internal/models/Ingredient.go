@@ -112,16 +112,14 @@ func (app *Application) GetIngredient(id int64) (Ingredient, error) {
 	query = fmt.Sprintf("SELECT alternative_id FROM %s WHERE ingredient_id = ?", AlternativesTable)
 	rows, err := app.DB.Query(query, id)
 	if err != nil {
-		app.ErrLog.Println(err)
+		app.logError(err)
 	}
 	defer rows.Close()
 
 	for rows.Next() {
 		var alternative int64
 		err = rows.Scan(&alternative)
-		if err != nil {
-			app.ErrLog.Println(err)
-		}
+		app.logError(err)
 		alternatives = append(alternatives, alternative)
 	}
 
@@ -131,25 +129,85 @@ func (app *Application) GetIngredient(id int64) (Ingredient, error) {
 }
 
 func (app *Application) UpdateIngredient(ingredient Ingredient) error {
+	query := fmt.Sprintf("UPDATE %s SET name = ?, description = ?, price = ?, amount = ?, type = ? WHERE id = ?", IngredientTable)
+	_, err := app.DB.Exec(query, ingredient.Name, ingredient.Description, ingredient.Price, ingredient.Amount, ingredient.Type, ingredient.ID)
+	if err != nil {
+		app.logError(err)
+		return err
+	}
 	return nil
 }
 
 func (app *Application) InsertIngredient(ingredient Ingredient) (int64, error) {
-	return 0, nil
+	query := fmt.Sprintf("INSERT INTO %s (name, description, price, amount, type) VALUES (?, ?, ?, ?, ?)", IngredientTable)
+	res, err := app.DB.Exec(query, ingredient.Name, ingredient.Description, ingredient.Price, ingredient.Amount, ingredient.Type)
+	if err != nil {
+		return 0, err
+	} else {
+		ID, err := res.LastInsertId()
+		if err != nil {
+			app.logError(err)
+			return 0, err
+		}
+		return ID, err
+	}
 }
 
 func (app *Application) DeleteIngredient(ingredient Ingredient) error {
+	query := fmt.Sprintf("DELETE FROM %s WHERE id = ?", IngredientTable)
+	_, err := app.DB.Exec(query, ingredient.ID)
+	if err != nil {
+		app.logError(err)
+		return err
+	}
 	return nil
 }
 
 func (app *Application) GetAlternatives(ingredientID int64) ([]int64, error) {
-	return []int64{}, nil
+	var alternatives []int64
+
+	query := fmt.Sprintf("SELECT alternative_id FROM %s WHERE ingredient_id = ?", AlternativesTable)
+	rows, err := app.DB.Query(query, ingredientID)
+	if err != nil {
+		app.logError(err)
+		return alternatives, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var alternative int64
+		err = rows.Scan(&alternative)
+		if err != nil {
+			app.logError(err)
+			return alternatives, err
+		}
+		alternatives = append(alternatives, alternative)
+	}
+
+	return alternatives, nil
 }
 
 func (app *Application) AddAlternative(ingredient int64, alternative int64) (int64, error) {
-	return 0, nil
+	query := fmt.Sprintf("INSERT INTO %s (ingredient_id, alternative_id) VALUES (?, ?)", AlternativesTable)
+	res, err := app.DB.Exec(query, ingredient, alternative)
+	if err != nil {
+		app.logError(err)
+		return 0, err
+	}
+	ID, err := res.LastInsertId()
+	if err != nil {
+		app.logError(err)
+		return 0, err
+	}
+	return ID, nil
 }
 
 func (app *Application) DeleteAlternative(ingredient int64, alternative int64) error {
+	query := fmt.Sprintf("DELETE FROM %s WHERE ingredient_id = ? AND alternative_id = ?", AlternativesTable)
+	_, err := app.DB.Exec(query, ingredient, alternative)
+	if err != nil {
+		app.logError(err)
+		return err
+	}
 	return nil
 }

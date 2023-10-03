@@ -20,3 +20,7 @@ func InitTables(db *sql.DB) {
 	CreateAdminTables(db)
 	CreateOrderTables(db)
 }
+
+func (app *Application) logError(err error) {
+	log.Println(err)
+}

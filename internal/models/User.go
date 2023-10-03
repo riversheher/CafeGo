@@ -85,6 +85,7 @@ func (app *Application) InsertUser(user User) (int64, error) {
 	} else {
 		ID, err := res.LastInsertId()
 		if err != nil {
+			app.logError(err)
 			return 0, err
 		}
 		return ID, nil

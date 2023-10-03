@@ -1,6 +1,7 @@
 package models_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -22,6 +23,12 @@ type IngredientTestSuite struct {
 	chives             models.Ingredient
 	leek               models.Ingredient
 	onion              models.Ingredient
+}
+
+func (suite *IngredientTestSuite) throwError(err error) {
+	if err != nil {
+		suite.T().Errorf("Error: %s", err.Error())
+	}
 }
 
 func (suite *IngredientTestSuite) SetupTest() {
@@ -70,22 +77,16 @@ func (suite *IngredientTestSuite) SetupTest() {
 	//insert ingredients
 	for _, ingredient := range []models.Ingredient{suite.chives, suite.leek, suite.onion} {
 		result, err := suite.app.DB.Exec(suite.insertIngredients, ingredient.Name, ingredient.Description, ingredient.Price, ingredient.Amount, ingredient.Type)
-		if err != nil {
-			suite.T().Errorf("Error inserting ingredient: %s", err.Error())
-		}
+		suite.throwError(err)
 		ingredient.ID, err = result.LastInsertId()
-		if err != nil {
-			suite.T().Errorf("Error getting last insert id: %s", err.Error())
-		}
+		suite.throwError(err)
 	}
 
 	//insert alternatives
 	for _, ingredient := range []models.Ingredient{suite.chives, suite.leek, suite.onion} {
 		for _, alternative := range ingredient.Alternatives {
 			_, err := suite.app.DB.Exec(suite.insertAlternatives, ingredient.ID, alternative)
-			if err != nil {
-				suite.T().Errorf("Error inserting alternative: %s", err.Error())
-			}
+			suite.throwError(err)
 		}
 	}
 }
@@ -101,23 +102,17 @@ func (suite *IngredientTestSuite) TestIngredientEquals() {
 
 func (suite *IngredientTestSuite) TestGetIngredient() {
 	ingredient, err := suite.app.GetIngredient(suite.chives.ID)
-	if err != nil {
-		suite.T().Errorf("Error getting ingredient: %s", err.Error())
-	}
+	suite.throwError(err)
 	assert.True(suite.T(), ingredient.Equals(suite.chives))
 }
 
 func (suite *IngredientTestSuite) TestUpdateIngredient() {
 	suite.chives.Description = "Floral green herb"
 	err := suite.app.UpdateIngredient(suite.chives)
-	if err != nil {
-		suite.T().Errorf("Error updating ingredient: %s", err.Error())
-	}
+	suite.throwError(err)
 	ingredient := models.Ingredient{}
 	err = suite.app.DB.QueryRow(suite.selectIngredients, suite.chives.ID).Scan(&ingredient.ID, &ingredient.Name, &ingredient.Description, &ingredient.Price, &ingredient.Amount, &ingredient.Type)
-	if err != nil {
-		suite.T().Errorf("Error getting ingredient: %s", err.Error())
-	}
+	suite.throwError(err)
 	assert.True(suite.T(), ingredient.Equals(suite.chives))
 }
 
@@ -131,50 +126,46 @@ func (suite *IngredientTestSuite) TestInsertIngredient() {
 		Type:         models.Count,
 	}
 	id, err := suite.app.InsertIngredient(ingredient)
-	if err != nil {
-		suite.T().Errorf("Error inserting ingredient: %s", err.Error())
-	}
+	suite.throwError(err)
 	ingredient.ID = id
+	fmt.Println(ingredient.ID)
 
 	newIngredient := models.Ingredient{}
 	err = suite.app.DB.QueryRow(suite.selectIngredients, ingredient.ID).Scan(&newIngredient.ID, &newIngredient.Name, &newIngredient.Description, &newIngredient.Price, &newIngredient.Amount, &newIngredient.Type)
-	if err != nil {
-		suite.T().Errorf("Error getting ingredient: %s", err.Error())
-	}
+	suite.throwError(err)
 	assert.True(suite.T(), ingredient.Equals(newIngredient))
 }
 
 func (suite *IngredientTestSuite) TestDeleteIngredient() {
 	err := suite.app.DeleteIngredient(suite.onion)
-	if err != nil {
-		suite.T().Errorf("Error deleting ingredient: %s", err.Error())
-	}
+	suite.throwError(err)
 	rows := suite.app.DB.QueryRow(suite.selectIngredients, suite.onion.ID)
 	err = rows.Scan()
-	if err == nil {
+	if err != nil {
+		assert.Equal(suite.T(), "sql: no rows in result set", err.Error())
+	} else {
 		suite.T().Errorf("Ingredient not deleted")
 	}
 }
 
 func (suite *IngredientTestSuite) TestGetAlternatives() {
 	alternatives, err := suite.app.GetAlternatives(suite.chives.ID)
-	if err != nil {
-		suite.T().Errorf("Error getting alternatives: %s", err.Error())
-	}
+	suite.throwError(err)
 	assert.Equal(suite.T(), suite.chives.Alternatives, alternatives)
 
 }
 
 func (suite *IngredientTestSuite) TestDeleteAlternative() {
 	err := suite.app.DeleteAlternative(suite.leek.ID, suite.chives.ID)
-	if err != nil {
-		suite.T().Errorf("Error deleting alternative: %s", err.Error())
-	}
-	rows := suite.app.DB.QueryRow(suite.selectAlternatives, suite.chives.ID, suite.leek.ID)
+	suite.throwError(err)
+	rows := suite.app.DB.QueryRow(suite.selectAlternatives, suite.leek.ID, suite.chives.ID)
 	err = rows.Scan()
-	if err == nil {
+	if err != nil {
+		assert.Equal(suite.T(), "sql: no rows in result set", err.Error())
+	} else {
 		suite.T().Errorf("Alternative not deleted")
 	}
+
 }
 
 func TestIngredient(t *testing.T) {
