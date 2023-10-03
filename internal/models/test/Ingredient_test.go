@@ -65,7 +65,7 @@ func (suite *IngredientTestSuite) SetupTest() {
 	suite.onion.Alternatives = []int64{suite.chives.ID, suite.leek.ID}
 
 	suite.selectIngredients = "SELECT id, name, description, price, amount, type FROM ingredients WHERE id = ?"
-	suite.selectAlternatives = "SELECT id, ingredient_id, alternative_id FROM alternatives WHERE id = ?"
+	suite.selectAlternatives = "SELECT id FROM alternatives WHERE ingredient_id = ? AND alternative_id = ?"
 	suite.insertIngredients = "INSERT INTO ingredients (name, description, price, amount, type) VALUES (?, ?, ?, ?, ?)"
 	suite.insertAlternatives = "INSERT INTO alternatives (ingredient_id, alternative_id) VALUES (?, ?)"
 	suite.deleteIngredients = "DELETE FROM ingredients WHERE id = ?"

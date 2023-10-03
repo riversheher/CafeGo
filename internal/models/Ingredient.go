@@ -106,24 +106,14 @@ func (app *Application) GetIngredient(id int64) (Ingredient, error) {
 	err := app.DB.QueryRow(query, id).Scan(&ingredient.ID, &ingredient.Name, &ingredient.Description, &ingredient.Price, &ingredient.Amount, &ingredient.Type)
 	if err != nil {
 		app.ErrLog.Println(err)
+		return ingredient, err
 	}
 
-	var alternatives []int64
-	query = fmt.Sprintf("SELECT alternative_id FROM %s WHERE ingredient_id = ?", AlternativesTable)
-	rows, err := app.DB.Query(query, id)
+	ingredient.Alternatives, err = app.GetAlternatives(id)
 	if err != nil {
-		app.logError(err)
+		app.ErrLog.Println(err)
+		return ingredient, err
 	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var alternative int64
-		err = rows.Scan(&alternative)
-		app.logError(err)
-		alternatives = append(alternatives, alternative)
-	}
-
-	ingredient.Alternatives = alternatives
 
 	return ingredient, nil
 }
@@ -149,6 +139,15 @@ func (app *Application) InsertIngredient(ingredient Ingredient) (int64, error) {
 			app.logError(err)
 			return 0, err
 		}
+
+		for _, alternative := range ingredient.Alternatives {
+			_, err := app.AddAlternative(ID, alternative)
+			if err != nil {
+				app.logError(err)
+				return ID, err
+			}
+		}
+
 		return ID, err
 	}
 }
