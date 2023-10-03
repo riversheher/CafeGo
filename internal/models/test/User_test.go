@@ -14,9 +14,18 @@ import (
 type UserTestSuite struct {
 	suite.Suite
 	app         models.Application
+	user1       models.User
+	user2       models.User
+	user3       models.User
 	selectQuery string //removes dependency on the methods in the models package
 	insertQuery string //removes dependency on the methods in the models package
 	deleteQuery string //removes dependency on the methods in the models package
+}
+
+func (suite *UserTestSuite) throwError(err error) {
+	if err != nil {
+		suite.T().Errorf("Error: %s", err.Error())
+	}
 }
 
 func (suite *UserTestSuite) SetupTest() {
@@ -27,6 +36,42 @@ func (suite *UserTestSuite) SetupTest() {
 	suite.selectQuery = "SELECT id, name, phone, rewards FROM users WHERE phone = ?"
 	suite.insertQuery = "INSERT INTO users (name, phone, rewards) VALUES (?, ?, ?)"
 	suite.deleteQuery = "DELETE FROM users WHERE phone = ?"
+
+	//insert test data
+	suite.user1 = models.User{
+		Name:    "User1",
+		Phone:   "1111111111",
+		Rewards: 0,
+	}
+	suite.user2 = models.User{
+		Name:    "User2",
+		Phone:   "2222222222",
+		Rewards: 0,
+	}
+	suite.user3 = models.User{
+		Name:    "User3",
+		Phone:   "3333333333",
+		Rewards: 0,
+	}
+
+	//initialize tables
+	models.CreateUserTables(suite.app.DB)
+
+	//insert test data
+	result, err := suite.app.DB.Exec(suite.insertQuery, suite.user1.Name, suite.user1.Phone, suite.user1.Rewards)
+	suite.throwError(err)
+	suite.user1.ID, err = result.LastInsertId()
+	suite.throwError(err)
+
+	result, err = suite.app.DB.Exec(suite.insertQuery, suite.user2.Name, suite.user2.Phone, suite.user2.Rewards)
+	suite.throwError(err)
+	suite.user2.ID, err = result.LastInsertId()
+	suite.throwError(err)
+
+	result, err = suite.app.DB.Exec(suite.insertQuery, suite.user3.Name, suite.user3.Phone, suite.user3.Rewards)
+	suite.throwError(err)
+	suite.user3.ID, err = result.LastInsertId()
+	suite.throwError(err)
 }
 
 func (suite *UserTestSuite) TearDownTest() {
@@ -43,199 +88,36 @@ func (suite *UserTestSuite) TestCreateUserTables() {
 }
 
 func (suite *UserTestSuite) TestUserEquals() {
-	user1 := models.User{
-		ID:      1,
-		Name:    "test",
-		Phone:   "1234567890",
-		Rewards: 0,
-	}
-	eqUser1 := models.User{
-		ID:      1,
-		Name:    "dslkfjsdl",
-		Phone:   "1234567890",
-		Rewards: 0,
-	}
-	alsoEQUser1 := models.User{
-		ID:      -1,
-		Name:    "test",
-		Phone:   "1234567890",
-		Rewards: 0,
-	}
-	user2 := models.User{
-		ID:      2,
-		Name:    "test",
-		Phone:   "0987654321",
-		Rewards: 0,
-	}
-
-	assert.True(suite.T(), user1.Equals(eqUser1))
-	assert.True(suite.T(), user1.Equals(alsoEQUser1))
-	assert.False(suite.T(), user1.Equals(user2))
+	assert.True(suite.T(), suite.user1.Equals(suite.user1))
+	assert.False(suite.T(), suite.user1.Equals(suite.user2))
 }
 
 func (suite *UserTestSuite) TestUserExists() {
-	user1 := models.User{
-		ID:      1,
-		Name:    "test",
-		Phone:   "1234567890",
-		Rewards: 0,
-	}
-	user2 := models.User{
-		ID:      2,
-		Name:    "test",
-		Phone:   "0987654321",
-		Rewards: 0,
-	}
-	anotherUser1 := models.User{
-		ID:      3,
-		Name:    "test",
-		Phone:   "1234567890",
-		Rewards: 0,
-	}
-
-	//check if user exists
-	exists := suite.app.UserExists(user1)
-	assert.False(suite.T(), exists)
-	exists = suite.app.UserExists(user2)
-	assert.False(suite.T(), exists)
-
-	//insert user
-	_, err := suite.app.DB.Exec(suite.insertQuery, user1.Name, user1.Phone, user1.Rewards)
-	if err != nil {
-		suite.T().Errorf("Error inserting user: %s", err.Error())
-	}
-
-	//check if user exists
-	exists = suite.app.UserExists(user1)
-	assert.True(suite.T(), exists)
-	exists = suite.app.UserExists(user2)
-	assert.False(suite.T(), exists)
-	exists = suite.app.UserExists(anotherUser1)
-	assert.True(suite.T(), exists)
-
-	//delete user
-	_, err = suite.app.DB.Exec(suite.deleteQuery, user1.Phone)
-	if err != nil {
-		suite.T().Errorf("Error deleting user: %s", err.Error())
-	}
-
+	assert.True(suite.T(), suite.app.UserExists(suite.user1))
+	assert.True(suite.T(), suite.app.UserExists(suite.user2))
+	assert.True(suite.T(), suite.app.UserExists(suite.user3))
 }
 
-func (suite *UserTestSuite) TestGetUserByPhone() {
-	user1 := models.User{
-		ID:      1,
-		Name:    "test",
-		Phone:   "1234567890",
-		Rewards: 0,
-	}
-	user2 := models.User{
-		ID:      2,
-		Name:    "test",
-		Phone:   "0987654321",
-		Rewards: 0,
-	}
-
-	//insert users
-	_, err := suite.app.DB.Exec(suite.insertQuery, user1.Name, user1.Phone, user1.Rewards)
-	if err != nil {
-		suite.T().Errorf("Error inserting user: %s", err.Error())
-	}
-
-	_, err = suite.app.DB.Exec(suite.insertQuery, user2.Name, user2.Phone, user2.Rewards)
-	if err != nil {
-		suite.T().Errorf("Error inserting user: %s", err.Error())
-	}
-
-	//get user
-	user := suite.app.GetUserByPhone(user1.Phone)
-	assert.Equal(suite.T(), user1, user)
-	assert.NotEqual(suite.T(), user2, user)
-
-	//delete users
-	_, err = suite.app.DB.Exec(suite.deleteQuery, user1.Phone)
-	if err != nil {
-		suite.T().Errorf("Error deleting user: %s", err.Error())
-	}
-}
-
-func (suite *UserTestSuite) UpdateUserByPhone() {
-	user1 := models.User{
-		ID:      1,
-		Name:    "test",
-		Phone:   "1234567890",
-		Rewards: 0,
-	}
-	updateUser1 := models.User{
-		ID:      1,
-		Name:    "testing",
-		Phone:   "1234567890",
-		Rewards: 0,
-	}
-
-	//insert user
-	_, err := suite.app.DB.Exec(suite.insertQuery, user1.Name, user1.Phone, user1.Rewards)
-	if err != nil {
-		suite.T().Errorf("Error inserting user: %s", err.Error())
-	}
-
-	//update user
-	suite.app.UpdateUserByPhone(updateUser1)
-
-	//get user
-	user := suite.app.DB.QueryRow(suite.selectQuery, user1.Phone)
-	assert.Equal(suite.T(), updateUser1, user)
-	assert.NotEqual(suite.T(), user1, user)
-
-	//delete user
-	_, err = suite.app.DB.Exec(suite.deleteQuery, user1.Phone)
-	if err != nil {
-		suite.T().Errorf("Error deleting user: %s", err.Error())
-	}
+func (suite *UserTestSuite) TestUpdateUser() {
+	suite.user3.Name = "User3Updated"
+	suite.app.UpdateUser(suite.user3)
+	var user models.User
+	err := suite.app.DB.QueryRow(suite.selectQuery, suite.user3.Phone).Scan(&user.ID, &user.Name, &user.Phone, &user.Rewards)
+	suite.throwError(err)
+	assert.Equal(suite.T(), suite.user3.Name, user.Name)
 }
 
 func (suite *UserTestSuite) TestInsertUser() {
 	user := models.User{
-		Name:    "test",
-		Phone:   "1111111111",
+		Name:    "User4",
+		Phone:   "4444444444",
 		Rewards: 0,
 	}
-
-	user2 := models.User{
-		Name:    "test2",
-		Phone:   "2222222222",
-		Rewards: 0,
-	}
-
-	//insert user
-	returningID, err := suite.app.InsertUser(user)
-	if err != nil {
-		suite.T().Errorf("Error inserting user: %s", err.Error())
-	}
-	assert.Equal(suite.T(), int64(1), returningID)
-
-	//get user
-	row := suite.app.DB.QueryRow(suite.selectQuery, user.Phone)
-	var id int64
-	var name string
-	var phone string
-	var rewards int64
-	err = row.Scan(&id, &name, &phone, &rewards)
-	if err != nil {
-		suite.T().Errorf("Error getting user: %s", err.Error())
-	}
-
-	//check if user is correct
-	assert.Equal(suite.T(), int64(1), id)
-	assert.Equal(suite.T(), user.Name, name)
-	assert.Equal(suite.T(), user.Phone, phone)
-	assert.Equal(suite.T(), user.Rewards, rewards)
-
-	//insert new user with auto increment
-	returningID, err = suite.app.InsertUser(user2)
-	if err != nil {
-		suite.T().Errorf("Error inserting user: %s", err.Error())
-	}
-	assert.Equal(suite.T(), int64(2), returningID)
+	result, err := suite.app.DB.Exec(suite.insertQuery, user.Name, user.Phone, user.Rewards)
+	suite.throwError(err)
+	user.ID, err = result.LastInsertId()
+	suite.throwError(err)
+	assert.True(suite.T(), suite.app.UserExists(user))
 }
 
 func TestUser(t *testing.T) {

@@ -69,9 +69,9 @@ func (app *Application) GetUserByPhone(phone string) User {
 	return user
 }
 
-func (app *Application) UpdateUserByPhone(user User) {
-	query := fmt.Sprintf("UPDATE %s SET name = ? rewards = ? WHERE phone = ?", UserTable)
-	_, err := app.DB.Exec(query, user.Name, user.Rewards, user.Phone)
+func (app *Application) UpdateUser(user User) {
+	query := fmt.Sprintf("UPDATE %s SET name = ?, phone = ?, rewards = ? WHERE id = ?", UserTable)
+	_, err := app.DB.Exec(query, user.Name, user.Phone, user.Rewards, user.ID)
 	if err != nil {
 		app.ErrLog.Println(err)
 	}
